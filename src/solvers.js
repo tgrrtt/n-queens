@@ -51,16 +51,10 @@ window.countNRooksSolutions = function(n) {
 window.findNQueensSolution = function(n) {
   if (n === 0) {
     return;
+  } else if (n === 2 || n === 3) {
+    return {'n': n};
   }
-  var possibleSolutions = generateAllPossibleBoards(n, 'queen');
-  for (var i = 0; i < possibleSolutions.length; i++) {
-    var board = new Board(possibleSolutions[i]);
-    // if (!board.hasAnyQueensConflicts()) {
-    var solution = board.attributes;
-    console.log('Single solution for ' + n + ' queens:', JSON.stringify(solution));
-    return solution;
-    // }
-  }
+  return generateAllPossibleBoards(n, 'queen')[0];
 };
 
 
@@ -109,15 +103,12 @@ window.generateAllPossibleBoards = function(n, queenOrRook){
     return false;
   };
 
-  var anyMajorDiagConflicts = function(arr){
+  var anyMajorDiagConflicts = function(arr, queenIdx){
     // check bottom right to top left
 
     if (arr.length === 1) {
       return false;
     }
-
-    var lastRow = arr[arr.length - 1]; // *
-    var queenIdx = lastRow.indexOf(1);
 
     var currentRowIdx = arr.length - 2;
     var currentColIdx = queenIdx - 1;
@@ -133,21 +124,18 @@ window.generateAllPossibleBoards = function(n, queenOrRook){
     return false;
   };
 
-  var anyMinorDiagConflicts = function(arr){
+  var anyMinorDiagConflicts = function(arr, queenIdx){
     // check bottom left to top right
 
     if (arr.length === 1) {
       return false;
     }
 
-    var lastRow = arr[arr.length - 1]; // *
-    var queenIdx = lastRow.indexOf(1);
-
     var currentRowIdx = arr.length - 2;
     var currentColIdx = queenIdx + 1;
 
     // decrementing while loop that starts at one less than length
-    while (currentRowIdx >= 0 && currentColIdx < lastRow.length){
+    while (currentRowIdx >= 0 && currentColIdx < arr[0].length){
       if (arr[currentRowIdx][currentColIdx] === 1) {
         return true;
       }
@@ -175,7 +163,7 @@ window.generateAllPossibleBoards = function(n, queenOrRook){
         subBoard.push(row);
         if (!anyColConflicts(subBoard)) {
           if (queenOrRook === 'queen'){
-            if (!anyMinorDiagConflicts(subBoard) && !anyMajorDiagConflicts(subBoard)){
+            if (!anyMinorDiagConflicts(subBoard, j) && !anyMajorDiagConflicts(subBoard, j)){
               results.push(subBoard);
             }
           } else {
