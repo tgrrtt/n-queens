@@ -13,11 +13,17 @@
 
 // return a matrix (an array of arrays) representing a single nxn chessboard, with n rooks placed such that none of them can attack each other
 
-window.findNRooksSolution = function(n) {
-  var solution = undefined; //fixme
 
-  console.log('Single solution for ' + n + ' rooks:', JSON.stringify(solution));
-  return solution;
+window.findNRooksSolution = function(n) {
+  var possibleSolutions = generateAllPossibleBoards(n);
+  for (var i = 0; i < possibleSolutions.length; i++) {
+    var board = new Board(possibleSolutions[i]);
+    if (!board.hasAnyRooksConflicts()) {
+      var solution = board.attributes;
+      console.log('Single solution for ' + n + ' rooks:', JSON.stringify(solution));
+      return solution;
+    }
+  }
 };
 
 
@@ -48,3 +54,43 @@ window.countNQueensSolutions = function(n) {
   console.log('Number of solutions for ' + n + ' queens:', solutionCount);
   return solutionCount;
 };
+
+
+window.generateAllPossibleBoards = function(n){
+  var possibleRows = [];
+  var rowTemplate = [];
+  var count = n;
+  while (count > 0) {
+    rowTemplate.push(0);
+    count--;
+  }
+  for (var i = 0; i < n; i++){
+    var row = rowTemplate.slice();
+    row[i] = 1;
+    possibleRows.push(row);
+  }
+
+  var generateAllPossibleSubBoards = function(cols, rows){
+    var results = [];
+    if (rows === 1){
+      for (var i = 0; i < possibleRows.length; i++){
+        results.push([possibleRows[i]]);
+      }
+      return results;
+    }
+
+    var possibleBoardsMinus1 = generateAllPossibleSubBoards(cols, rows-1);
+
+    for (var i = 0; i < possibleBoardsMinus1.length; i++){
+      for (var j = 0; j < possibleRows.length; j++){
+        var subBoard = possibleBoardsMinus1[i].slice();
+        var row = possibleRows[j];
+        subBoard.push(row);
+        results.push(subBoard);
+      }
+    }
+    return results;
+  };
+  return generateAllPossibleSubBoards(n, n);
+};
+
