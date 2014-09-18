@@ -49,23 +49,40 @@ window.countNRooksSolutions = function(n) {
 
 // return a matrix (an array of arrays) representing a single nxn chessboard, with n queens placed such that none of them can attack each other
 window.findNQueensSolution = function(n) {
-  var solution = undefined; //fixme
-
-  console.log('Single solution for ' + n + ' queens:', JSON.stringify(solution));
-  return solution;
+  if (n === 0) {
+    return;
+  }
+  var possibleSolutions = generateAllPossibleBoards(n, 'queen');
+  for (var i = 0; i < possibleSolutions.length; i++) {
+    var board = new Board(possibleSolutions[i]);
+    // if (!board.hasAnyQueensConflicts()) {
+    var solution = board.attributes;
+    console.log('Single solution for ' + n + ' queens:', JSON.stringify(solution));
+    return solution;
+    // }
+  }
 };
 
 
 // return the number of nxn chessboards that exist, with n queens placed such that none of them can attack each other
 window.countNQueensSolutions = function(n) {
-  var solutionCount = undefined; //fixme
+  if (n === 0){
+    return 1;
+  }
+  var solutionCount = 0;
+
+  var possibleSolutions = generateAllPossibleBoards(n, 'queen');
+  for (var i = 0; i < possibleSolutions.length; i++) {
+    var board = new Board(possibleSolutions[i]);
+    solutionCount++;
+  }
 
   console.log('Number of solutions for ' + n + ' queens:', solutionCount);
   return solutionCount;
 };
 
 
-window.generateAllPossibleBoards = function(n){
+window.generateAllPossibleBoards = function(n, queenOrRook){
   var possibleRows = [];
   var rowTemplate = [];
   var count = n;
@@ -92,6 +109,54 @@ window.generateAllPossibleBoards = function(n){
     return false;
   };
 
+  var anyMajorDiagConflicts = function(arr){
+    // check bottom right to top left
+
+    if (arr.length === 1) {
+      return false;
+    }
+
+    var lastRow = arr[arr.length - 1]; // *
+    var queenIdx = lastRow.indexOf(1);
+
+    var currentRowIdx = arr.length - 2;
+    var currentColIdx = queenIdx - 1;
+
+    // decrementing while loop that starts at one less than length
+    while (currentRowIdx >= 0 && currentColIdx >= 0){
+      if (arr[currentRowIdx][currentColIdx] === 1) {
+        return true;
+      }
+      currentRowIdx--;
+      currentColIdx--;
+    }
+    return false;
+  };
+
+  var anyMinorDiagConflicts = function(arr){
+    // check bottom left to top right
+
+    if (arr.length === 1) {
+      return false;
+    }
+
+    var lastRow = arr[arr.length - 1]; // *
+    var queenIdx = lastRow.indexOf(1);
+
+    var currentRowIdx = arr.length - 2;
+    var currentColIdx = queenIdx + 1;
+
+    // decrementing while loop that starts at one less than length
+    while (currentRowIdx >= 0 && currentColIdx < lastRow.length){
+      if (arr[currentRowIdx][currentColIdx] === 1) {
+        return true;
+      }
+      currentRowIdx--;
+      currentColIdx++;
+    }
+    return false;
+  };
+
   var generateAllPossibleSubBoards = function(cols, rows){
     var results = [];
     if (rows === 1){
@@ -109,7 +174,13 @@ window.generateAllPossibleBoards = function(n){
         var row = possibleRows[j];
         subBoard.push(row);
         if (!anyColConflicts(subBoard)) {
-          results.push(subBoard);
+          if (queenOrRook === 'queen'){
+            if (!anyMinorDiagConflicts(subBoard) && !anyMajorDiagConflicts(subBoard)){
+              results.push(subBoard);
+            }
+          } else {
+            results.push(subBoard);
+          }
         }
       }
     }
