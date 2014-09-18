@@ -63,16 +63,32 @@ window.countNQueensSolutions = function(n) {
   if (n === 0){
     return 1;
   }
-  var solutionCount = 0;
-
-  var possibleSolutions = generateAllPossibleBoards(n, 'queen');
-  for (var i = 0; i < possibleSolutions.length; i++) {
-    var board = new Board(possibleSolutions[i]);
-    solutionCount++;
-  }
+  var solutionCount = nQueensBitwise(n);
 
   console.log('Number of solutions for ' + n + ' queens:', solutionCount);
   return solutionCount;
+};
+
+
+window.nQueensBitwise = function(n){
+  var solutionsCount = 0;
+  var filled = Math.pow(2, n) - 1;
+  var recurse = function(leftDiagScreen, columnScreen, rightDiagScreen){
+    var open = ~(leftDiagScreen | columnScreen | rightDiagScreen) & filled;
+    while (open > 0) {
+      var row = -open & open;
+      open = open - row;
+      var newLeftDiagScreen = (leftDiagScreen | row) << 1;
+      var newRightDiagScreen = (rightDiagScreen | row) >> 1;
+      var newColumnScreen = columnScreen | row;
+      recurse(newLeftDiagScreen, newColumnScreen, newRightDiagScreen);
+      if (newColumnScreen === filled) {
+        solutionsCount++;
+      }
+    }
+  };
+  recurse(0,0,0);
+  return solutionsCount;
 };
 
 
